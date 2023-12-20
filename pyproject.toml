@@ -1,0 +1,80 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "infinite-isopod"
+version = "0.7.0"
+description = "PostgreSQL (and compatibles) ORM"
+authors = ["Lura Skye <l@veriny.tf>"]
+readme = "README.rst"
+license = "LGPL-3.0-or-later"
+packages = [{ include = "infiopod", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+pg-purepy = ">=0.9.4"
+structlog = ">=23.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pyright = ">=1.1.342"
+trio = ">=0.23.2"
+ruff = ">=0.1.8"
+mypy = ">=1.7.1"
+
+[tool.ruff]
+target-version = "py312"
+respect-gitignore = true
+# fix = true
+src = ["src/infipod"]
+line-length = 100
+show-source = true
+
+select = [
+  "RUF",
+  "F",
+  "E",
+  "W",
+  "I",
+  "UP",
+  "B",
+  "D",
+  "YTT",
+  "ASYNC",
+  "TRIO",
+  "PYI",
+  "SIM",
+  "RET",
+  "PERF",
+]
+ignore = [
+    "W291",
+    "W293",
+    # has anyone ever benefitted from module/package docstrings?
+    "D100",
+    "D104",
+
+    # disable fuck-ugly docstring style
+    "D200",
+    "D211",
+    "D212",
+]
+
+[tool.ruff.isort]
+combine-as-imports = true
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+
+local_partial_types = true
+warn_unused_ignores = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_return_any = true
+
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_subclassing_any = true
+disallow_untyped_calls = true
+check_untyped_defs = true
