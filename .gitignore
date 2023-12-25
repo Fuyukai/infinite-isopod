@@ -28,3 +28,8 @@ poetry.toml
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# you see nothing :)
+aaa.py
+
+.coverage
