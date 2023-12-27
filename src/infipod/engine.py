@@ -197,7 +197,7 @@ async def create_table_schemas(
     conn: pg_purepy.PooledDatabaseInterface,
     schema_types: Iterable[type[TableSchema]],
     strict: bool = True,
-) -> SchemaMapping:
+) -> tuple[SchemaMapping, Iterable[pg_purepy.Converter]]:
     """
     Loads internal PostgreSQL schema data from the database.
 
@@ -275,15 +275,37 @@ async def create_table_schemas(
 
     schemas = list(await map_as_completed(schema_types, backfill_table_data))
     schemas = [i for i in schemas if i is not None]
+
+    # poor mans set, keyed by type ID
+    converters: dict[str, pg_purepy.Converter] = {}
     for schema in schemas:
         for column in schema.all_columns.values():
             schema_type = column.type
             if not isinstance(schema_type, DatabaseTypeWithConverter):
                 continue
 
-            raise NotImplementedError("custom type converters")
+            try:
+                oid_row = await conn.fetch_one(
+                    "SELECT oid FROM pg_type WHERE typname = $1;", schema_type.postgresql_name
+                )
+                oid = cast(int, oid_row.data[0])
+            except pg_purepy.MissingRowError as e:
+                if strict:
+                    raise SchemaLoadFailedError(
+                        f"Can't find OID for type {schema_type.postgresql_name}"
+                    ) from e
 
-    return {type(it): it for it in schemas}
+                logger.warning(
+                    "Unknown type",
+                    column=column.name,
+                    type=schema_type.postgresql_name,
+                    table=schema.table_name,
+                )
+                continue
+
+            converters[schema_type.postgresql_name] = schema_type.create_converter(oid)
+
+    return ({type(it): it for it in schemas}, converters.values())
 
 
 @asynccontextmanager
@@ -333,7 +355,11 @@ async def spawn_isopods(
         database=database,
         ssl_context=ssl_context,
     ) as pool:
-        schemas = await create_table_schemas(pool, tables, strict=strict_schema_loading)
+        schemas, converters = await create_table_schemas(pool, tables, strict=strict_schema_loading)
+
+        for converter in converters:
+            pool.add_converter(converter)
+
         yield IsopodPool(pool, schemas)
 
 
@@ -360,5 +386,9 @@ async def spawn_isopods_from_pool(
         migration.
     """
 
-    schemas = await create_table_schemas(pool, tables, strict=strict_schema_loading)
+    schemas, converters = await create_table_schemas(pool, tables, strict=strict_schema_loading)
+
+    for converter in converters:
+        pool.add_converter(converter)
+
     return IsopodPool(pool, schemas)

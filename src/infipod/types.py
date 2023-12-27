@@ -61,7 +61,7 @@ class EnumType[E: Enum](DatabaseTypeWithConverter[E]):
 
     def __init__(
         self,
-        enum_type: type[Enum],
+        enum_type: type[E],
         postgresql_name: str | None = None,
     ) -> None:
         """

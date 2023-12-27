@@ -17,6 +17,10 @@ class ExampleTable(TableSchema):
     field = Column(TextType())
 
 
+class SecondTable(TableSchema):
+    id = Column(Int4Type())
+
+
 @pytest.fixture(scope="function")
 async def engine(postgresql: PooledDatabaseInterface) -> AsyncGenerator[IsopodPool, None]:
     await postgresql.execute(
@@ -27,8 +31,15 @@ async def engine(postgresql: PooledDatabaseInterface) -> AsyncGenerator[IsopodPo
         );
         """
     )
+    await postgresql.execute(
+        """
+        CREATE TEMPORARY TABLE second_table (
+            id INT4 PRIMARY KEY GENERATED ALWAYS AS IDENTITY
+        );
+        """
+    )
 
-    yield await spawn_isopods_from_pool(postgresql, [ExampleTable])
+    yield await spawn_isopods_from_pool(postgresql, [ExampleTable, SecondTable])
 
 
 async def test_basic_engine_connection(postgresql: PooledDatabaseInterface):
@@ -105,3 +116,12 @@ async def test_checking_out_connection(engine: IsopodPool):
 
     with pytest.raises(MissingRowError):
         await engine.fetch_one("SELECT * FROM example_table;")
+
+
+async def test_two_tables_same_index(engine: IsopodPool):
+    await engine.execute("INSERT INTO example_table (field) VALUES ('');")
+    row = await engine.fetch_one("SELECT id FROM example_table");
+
+    with pytest.raises(KeyError):
+        # same column_idx.
+        row[SecondTable.id]

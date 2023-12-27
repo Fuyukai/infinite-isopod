@@ -96,7 +96,7 @@ class TableSchema(metaclass=_TableMeta):
     table_name: ClassVar[str]
 
     #: A mapping of of all of the columns for this table.
-    all_columns: ClassVar[Mapping[str, Column[DatabaseType[Any]]]]
+    all_columns: ClassVar[Mapping[str, Column[Any]]]
 
     def __init__(
         self,
