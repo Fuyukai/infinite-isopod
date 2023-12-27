@@ -120,7 +120,7 @@ async def test_checking_out_connection(engine: IsopodPool):
 
 async def test_two_tables_same_index(engine: IsopodPool):
     await engine.execute("INSERT INTO example_table (field) VALUES ('');")
-    row = await engine.fetch_one("SELECT id FROM example_table");
+    row = await engine.fetch_one("SELECT id FROM example_table;")
 
     with pytest.raises(KeyError):
         # same column_idx.
