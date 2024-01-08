@@ -1,7 +1,7 @@
 Infinite Isopod
 ---------------
 
-Current prototype for an "ORM-lite" for PostgreSQL using my PG wrapper.
+Small little library I use to make using my PostgreSQL wrapper a bit easier.
 
 Currently supported:
 
@@ -11,4 +11,4 @@ Currently supported:
 
 Planned:
 
-- jOOQ-like query building layer
+- jOOQ-like query building layer (possibly)

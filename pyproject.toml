@@ -4,12 +4,12 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "infinite-isopod"
-version = "0.1.0"
-description = "PostgreSQL (and compatibles) semi-ORM"
+version = "0.7.0"
+description = "Tiny PostgreSQL toolkit"
 authors = ["Lura Skye <l@veriny.tf>"]
 readme = "README.rst"
 license = "LGPL-3.0-or-later"
-packages = [{ include = "infiopod", from = "src" }]
+packages = [{ include = "infipod", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.12"
@@ -19,7 +19,7 @@ anyio = ">=4.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pyright = ">=1.1.342"
-trio = {git = "https://github.com/jakkdl/trio", rev = "raisesgroup"}
+trio = {git = "https://github.com/python-trio/trio", rev = "aadd1ea56f2b64d920a70897abb1a7178b54cfab"}
 ruff = ">=0.1.8"
 mypy = ">=1.7.1"
 pytest = "^7.4.3"
